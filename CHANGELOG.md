@@ -1,5 +1,12 @@
-# Changelog
+# CHANGELOG
 
-See [Keep a Changelog](https://keepachangelog.com/). Entries below are written by
-[python-semantic-release](https://python-semantic-release.readthedocs.io/) on each
-release to `main`.
+
+## v0.1.1 (2026-09-06)
+
+### Bug Fixes
+
+- Worflows and readme
+  ([`b6ab3e3`](https://github.com/itzhakstern/lancecli/commit/b6ab3e3addcf40ac1b1f33afb91d71d07a771075))
+
+
+## v0.1.0 (2026-09-06)

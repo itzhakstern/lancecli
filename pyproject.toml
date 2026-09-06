@@ -1,6 +1,6 @@
 [project]
 name = "lancecli"
-version = "0.1.0"
+version = "0.1.1"
 description = "Inspect and dump Lance datasets from the command line (parquet-tools equivalent)."
 readme = "README.md"
 requires-python = ">=3.10"
