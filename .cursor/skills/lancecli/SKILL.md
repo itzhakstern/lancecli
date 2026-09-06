@@ -31,7 +31,7 @@ Human architecture map (repo root): `MAP.md`. User-facing examples: `README.md`.
 - **Indexes are live-row positions** in the opened version, not the `id` column.
 - Do not `show` / `SELECT *` all columns on wide remote datasets in docs or tests. Always project with `-c`.
 - Do not commit, push, or publish to PyPI unless the user asks.
-- Line length 100, Ruff `E,F,I,UP`, Python ≥ 3.10. Keep `__version__` in `src/lancecli/__init__.py` in sync with `pyproject.toml`.
+- Line length 100, Ruff `E,F,I,UP`, Python ≥ 3.10. Version numbers are bumped by python-semantic-release on `main` (`pyproject.toml` and `src/lancecli/__init__.py`). Do not edit them by hand on `main` unless skipping the bot.
 
 ## Adding a command
 

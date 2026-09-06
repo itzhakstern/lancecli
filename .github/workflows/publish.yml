@@ -1,7 +1,3 @@
-# Publishes to PyPI when you push a tag like v0.1.0.
-# One-time setup: PyPI → Publishing → Trusted publishers
-#   Owner: <github user>, Repository: lancecli, Workflow: publish.yml, Environment: pypi
-# Also create a GitHub Environment named "pypi" (Settings → Environments).
 
 name: Publish
 

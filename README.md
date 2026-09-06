@@ -1,10 +1,8 @@
 # lancecli
 
-Inspect and dump [Lance](https://lance.org/) datasets from the command line, the same way [parquet-tools](https://github.com/ktrueda/parquet-tools) does for Parquet files.
+Inspect and dump [Lance](https://lance.org/) datasets from the command line.
 
 Reads go through [pylance](https://pypi.org/project/pylance/) only. There is no DuckDB (or pandas) on the data path: column projection, SQL filters, sorts, and row limits are pushed into the Lance scanner. Random row access uses Lance `take`, not a full scan.
-
-How the code is put together (without walking the source): [MAP.md](MAP.md).
 
 - [Install](#install)
 - [Demo dataset](#demo-dataset)
@@ -28,37 +26,12 @@ lancecli --help
 lancecli stat /path/to/dataset.lance
 ```
 
-Python 3.10 or newer. No extra tools (`uv`, DuckDB, …) are required at runtime.
-
-The URI is a positional argument (local directory, `s3://`, `gs://`, or `az://`). Flags can go before or after it.
-
 ```
 lancecli <command> [flags] <URI>
 ```
-
+The URI is a positional argument (local directory, `s3://`, `gs://`, or `az://`). Flags can go before or after it.
 Every command also has `-h` / `--help` with the same flags.
 
----
-
-## Demo dataset
-
-A tiny local dataset lives at [`examples/events.lance`](examples/events.lance) **in this git repo** (not installed by pip). After cloning, regenerate with:
-
-```bash
-python examples/make_events.py
-```
-
-| | |
-|---|---|
-| Rows | 50 |
-| Columns | `id` (int64), `name` (string), `age` (int64), `city` (string), `embedding` (`fixed_size_list<float>[4]`) |
-| Cities | `TLV`, `NYC`, `BER`, `LON` cycling by row |
-| Ages | `20 + (id % 40)` so the range is 20–59 |
-| Indexes | none |
-
-Every example below is copy-paste against that file. On a wide remote dataset, always pass `-c` / `--columns` — do not `show` every column.
-
----
 
 ## Quick start
 
@@ -103,7 +76,7 @@ lancecli show -n 5 -c id,age --order-by age:desc examples/events.lance
 
 ### `stat`
 
-First command to run on an unfamiliar dataset. Metadata only — no row scan. Prints rows, deleted %, fragment sizes, on-disk data size, version, format, and indexes. When something looks unhealthy (many deletions, many tiny fragments, no indexes on a large table) it prints a hint underneath.
+First command to run on an unfamiliar dataset. Metadata only — no row scan. Prints rows, deleted, fragment sizes, on-disk data size, version, format, and indexes.
 
 ```bash
 lancecli stat examples/events.lance
@@ -698,8 +671,8 @@ Lance talks to object stores natively. Pass a cloud URI; do not download files f
 **Preferred: environment only** (no `--endpoint-url`, no `--storage-option`):
 
 ```bash
-export AWS_ACCESS_KEY_ID=...
-export AWS_SECRET_ACCESS_KEY=...
+export AWS_ACCESS_KEY_ID=<AWS_ACCESS_KEY_ID>
+export AWS_SECRET_ACCESS_KEY=<AWS_SECRET_ACCESS_KEY>
 export AWS_ENDPOINT_URL=http://s3-compatible.example   # skip on real AWS
 export AWS_DEFAULT_REGION=us-east-1                    # often required on-prem
 # AWS_ALLOW_HTTP=true  # optional; inferred from http:// endpoints
@@ -715,38 +688,4 @@ lancecli stat s3://bucket/events.lance --endpoint-url http://localhost:9000
 lancecli show gs://bucket/events.lance --storage-option service_account=./sa.json -n 5 -c id
 ```
 
-On a wide remote table, always project columns (`-c`). `take` is cheaper than `show` when you only need specific row indexes.
-
----
-
-## Development
-
-Clone the repo, then either:
-
-```bash
-pip install -e ".[dev]"
-pytest -q
-ruff check src tests
-```
-
-or with [uv](https://docs.astral.sh/uv/):
-
-```bash
-uv sync --extra dev
-uv run pytest -q
-uv run ruff check src tests
-uv run ruff format src tests
-```
-
-Keep `__version__` in `src/lancecli/__init__.py` in sync with `version` in `pyproject.toml`.
-
----
-
-## Releasing
-
-1. Bump `version` in `pyproject.toml` **and** `src/lancecli/__init__.py` (same string).
-2. Push to GitHub; CI should be green.
-3. Tag and publish (see the chat / notes you used for the first release), e.g. `git tag v0.1.0 && git push origin v0.1.0`.
-4. After PyPI has the package, users only need `pip install lancecli` and the `lancecli` command.
-
-Do not commit PyPI tokens. GitHub Actions trusted publishing (`.github/workflows/publish.yml`) is the preferred path once the PyPI project exists.
+On a wide remote table, always project columns (`-c`). `take` is cheaper than `show` when you need specific row indexes.
