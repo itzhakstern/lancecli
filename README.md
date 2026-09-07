@@ -5,13 +5,9 @@ Inspect and dump [Lance](https://lance.org/) datasets from the command line.
 Reads go through [pylance](https://pypi.org/project/pylance/) only. There is no DuckDB (or pandas) on the data path: column projection, SQL filters, sorts, and row limits are pushed into the Lance scanner. Random row access uses Lance `take`, not a full scan.
 
 - [Install](#install)
-- [Demo dataset](#demo-dataset)
 - [Quick start](#quick-start)
 - [Commands](#commands) — worked examples on `examples/events.lance`
-- [CLI reference](#cli-reference) — **every flag, format, env var, and exit code**
 - [Cloud storage](#cloud-storage) — env-only S3, then optional flags
-- [Development](#development)
-- [Releasing](#releasing)
 
 ## Install
 
@@ -518,37 +514,6 @@ When indexes exist, `stat` summarizes them on one line and suggests using `--fil
 
 ---
 
-## CLI reference
-
-This is the full surface of `lancecli`. `lancecli <command> --help` prints the same flags. There is no separate Python import API — the package *is* this CLI.
-
-### Command × flags
-
-`●` = accepted. Empty = not on that command.
-
-| Flag | show | csv | jsonl | tail | take | sample | freq | schema | inspect | stat | count | versions | fragments | indices |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `URI` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| `-c` / `--columns` | ● | ● | ● | ● | ● | ● | — | | | | | | | |
-| `-c` / `--column` | | | | | | | ● | | | | | | | |
-| `--filter` | ● | ● | ● | ● | | ● | ● | | | | ● | | | |
-| `--order-by` | ● | ● | ● | ● | ● | ● | | | | | | | | |
-| `-n` / `--head` | ● | ● | ● | ● | | ● | ● | | | | | | | |
-| `--indices` / `-i` | | | | | ● | | | | | | | | | |
-| `--seed` | | | | | | ● | | | | | | | | |
-| `--full` | ● | ● | ● | ● | ● | ● | | | | | | | | |
-| `-f` / `--format` | ● | | | ● | ● | ● | ● | ● | ● | ● | | ● | ● | ● |
-| `--physical` | | | | | | | | ● | | | | | | |
-| `--version` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | | ● | ● |
-| `--tag` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | | ● | ● |
-| `--asof` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | | ● | ● |
-| `--endpoint-url` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| `--aws-profile` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-| `--storage-option` | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● | ● |
-
-`csv` and `jsonl` have no `--format`: they *are* the format. `versions` always lists the whole history (no `--version` checkout). `take` has no `--filter` — it addresses rows by position.
-
-Metadata-only (no row scan unless noted): `stat`, `inspect`, `schema`, unfiltered `count`, `versions`, `fragments`, `indices`. `count --filter` and `freq` do scan.
 
 ### URI
 
@@ -654,13 +619,6 @@ Real AWS S3 (no custom endpoint) usually needs only credentials or an instance r
 
 **Azure**: `AZURE_STORAGE_ACCOUNT_NAME`, `AZURE_STORAGE_ACCOUNT_KEY`, `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_STORAGE_SAS_KEY`, plus Entra ID vars when using AAD.
 
-### Exit codes
-
-| Code | Meaning |
-|---|---|
-| 0 | Success. Bare `lancecli` (no command) prints help and exits 0. |
-| 1 | User error: missing dataset, bad `--indices` / `--order-by` / `--storage-option`, unsupported `--format`, not a Lance directory. |
-| 2 | Unexpected exception while opening or running. |
 
 ---
 
