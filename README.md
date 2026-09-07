@@ -25,7 +25,7 @@ lancecli stat /path/to/dataset.lance
 ```
 lancecli <command> [flags] <URI>
 ```
-The URI is a positional argument (local directory, `s3://`, `gs://`, or `az://`). Flags can go before or after it.
+The URI is a positional argument (local directory or `s3://`). Flags can go before or after it.
 Every command also has `-h` / `--help` with the same flags.
 
 
@@ -523,9 +523,6 @@ Last positional argument (flags may sit before or after it).
 |---|---|
 | Local dataset directory | `examples/events.lance` |
 | S3 / S3-compatible | `s3://bucket/path/events.lance` |
-| GCS | `gs://bucket/path/events.lance` |
-| Azure | `az://container/path/events.lance` |
-| Hugging Face | `hf://…` |
 
 Must be the **dataset directory** (contains `_versions/` or `data/`), not a single `.lance` fragment file inside `data/`.
 
@@ -581,9 +578,9 @@ Unbounded `csv`/`jsonl` to a TTY with more than 10,000 matching rows prints a st
 |---|---|
 | `--endpoint-url URL` | S3-compatible endpoint. Overrides `AWS_ENDPOINT_URL` / `AWS_ENDPOINT` / `AWS_ENDPOINT_URL_S3`. `http://` implies `allow_http=true` unless you set `--storage-option allow_http=false`. |
 | `--aws-profile NAME` | Sets `AWS_PROFILE` for this process. Not needed if `AWS_PROFILE` is already exported. Lance cannot take a profile via `storage_options`. |
-| `--storage-option KEY=VALUE` | Repeatable. Highest priority object-store knob. Examples: `region=us-east-1`, `allow_http=true`, `virtual_hosted_style_request=true`, `service_account=./sa.json`. |
+| `--storage-option KEY=VALUE` | Repeatable. Highest priority object-store knob. Examples: `region=us-east-1`, `allow_http=true`, `virtual_hosted_style_request=true`. |
 
-Common `KEY`s (passed through to pylance / [object_store](https://docs.rs/object_store/)):
+Common S3 `KEY`s (passed through to pylance / [object_store](https://docs.rs/object_store/)):
 
 | Key | Typical use |
 |---|---|
@@ -592,14 +589,12 @@ Common `KEY`s (passed through to pylance / [object_store](https://docs.rs/object
 | `allow_http` | `true` for `http://` endpoints |
 | `virtual_hosted_style_request` | Path-style vs virtual-hosted buckets |
 | `timeout` / `connect_timeout` | Request timeouts |
-| `service_account` | GCS JSON key path |
-| `account_name` / `account_key` / `sas_key` | Azure |
 
 Do not put access keys on the command line; use environment variables.
 
 ### Environment variables
 
-For a **remote** URI (`s3://`, `gs://`, `az://`, …), `lancecli` reads the process environment. **CLI flags override env.** Local paths ignore AWS connection env so `show ./events.lance` stays local.
+For an **`s3://` URI**, `lancecli` reads the process environment. **CLI flags override env.** Local paths ignore AWS connection env so `show ./events.lance` stays local.
 
 **S3 and S3-compatible (MinIO, Ceph, …)** — set these and omit storage flags:
 
@@ -615,16 +610,11 @@ For a **remote** URI (`s3://`, `gs://`, `az://`, …), `lancecli` reads the proc
 
 Real AWS S3 (no custom endpoint) usually needs only credentials or an instance role — no `lancecli` flags.
 
-**GCS** (object_store / Lance, not lancecli-specific): `GOOGLE_APPLICATION_CREDENTIALS`, `GOOGLE_SERVICE_ACCOUNT`, `GOOGLE_SERVICE_ACCOUNT_KEY`.
-
-**Azure**: `AZURE_STORAGE_ACCOUNT_NAME`, `AZURE_STORAGE_ACCOUNT_KEY`, `AZURE_STORAGE_CONNECTION_STRING`, `AZURE_STORAGE_SAS_KEY`, plus Entra ID vars when using AAD.
-
-
 ---
 
 ## Cloud storage
 
-Lance talks to object stores natively. Pass a cloud URI; do not download files first.
+Cloud usage documented here is **S3 and S3-compatible stores** (including AWS). Pass an `s3://` URI; do not download files first.
 
 **Preferred: environment only** (no `--endpoint-url`, no `--storage-option`):
 
@@ -643,7 +633,7 @@ Flags still work and **override** env when you need a one-off:
 
 ```bash
 lancecli stat s3://bucket/events.lance --endpoint-url http://localhost:9000
-lancecli show gs://bucket/events.lance --storage-option service_account=./sa.json -n 5 -c id
+lancecli show -n 5 -c id,name s3://bucket/events.lance --storage-option region=us-east-1
 ```
 
 On a wide remote table, always project columns (`-c`). `take` is cheaper than `show` when you need specific row indexes.
